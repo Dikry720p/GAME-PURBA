@@ -1,2 +1,2 @@
 # GAME-PURBA
- ini adalah tempa dimana game random muncul ketika sedang ngahuleng
+ ini adalah tempat dimana game random muncul ketika sedang ngahuleng
