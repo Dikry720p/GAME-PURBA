@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ORAY PURBA PEMAKAN BANCET</title>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
+
+    body {
+      background: black;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+
+    canvas {
+      border: 1px solid white;
+    }
+
+    #joystick {
+      display: flex;
+      margin-top: 10px;
+    }
+
+    .joystick-button {
+      width: 50px;
+      height: 50px;
+      background-color: #3498db;
+      border-radius: 50%;
+      margin: 0 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1 style="color: aqua;">ORAY PURBA DELUXE</h1>
+  <canvas width="400" height="400" id="game"></canvas>
+  <div id="joystick">
+    <div class="joystick-button" id="up">↑</div>
+    <div class="joystick-button" id="left">←</div>
+    <div class="joystick-button" id="right">→</div>
+    <div class="joystick-button" id="down">↓</div>
+  </div>
+  <h3><a href="https://www.instagram.com/bucket_.man?igsh=OGQ5ZDc2ODk2ZA==">PlayWithAbdul</a></h3>
+  <script>
+    var canvas = document.getElementById('game');
+    var context = canvas.getContext('2d');
+
+    var grid = 16;
+    var count = 0;
+    var showMessage = false;
+    var message = '';
+    var messageDuration = 10; // Durasi pesan dalam detik
+
+    var oray = {
+      x: 160,
+      y: 160,
+      dx: grid,
+      dy: 0,
+      cells: [],
+      maxCells: 4
+    };
+    var bancet = {
+      x: 320,
+      y: 320
+    };
+
+    var score = 0;
+
+    function getRandomInt(min, max) {
+      return Math.floor(Math.random() * (max - min)) + min;
+    }
+
+    function loop() {
+      requestAnimationFrame(loop);
+
+      if (++count < 4) {
+        return;
+      }
+
+      count = 0;
+      context.clearRect(0, 0, canvas.width, canvas.height);
+
+      var gradient = context.createLinearGradient(0, 0, canvas.width, canvas.height);
+      gradient.addColorStop(0, '#3498db');
+      gradient.addColorStop(1, '#1abc9c');
+      context.fillStyle = gradient;
+      context.fillRect(0, 0, canvas.width, canvas.height);
+
+      if (showMessage) {
+        showMessageForSeconds(messageDuration);
+      } else {
+        oray.x += oray.dx;
+        oray.y += oray.dy;
+
+        if (oray.x < 0) {
+          oray.x = canvas.width - grid;
+        } else if (oray.x >= canvas.width) {
+          oray.x = 0;
+        }
+
+        if (oray.y < 0) {
+          oray.y = canvas.height - grid;
+        } else if (oray.y >= canvas.height) {
+          oray.y = 0;
+        }
+
+        oray.cells.unshift({ x: oray.x, y: oray.y });
+
+        if (oray.cells.length > oray.maxCells) {
+          oray.cells.pop();
+        }
+
+        context.fillStyle = '#e74c3c';
+        context.fillRect(bancet.x, bancet.y, grid - 1, grid - 1);
+
+        context.fillStyle = '#2ecc71';
+        oray.cells.forEach(function (cell, index) {
+          context.fillRect(cell.x, cell.y, grid - 2, grid - 2);
+
+          if (cell.x === bancet.x && cell.y === bancet.y) {
+            oray.maxCells++;
+            score++;
+            bancet.x = getRandomInt(0, 25) * grid;
+            bancet.y = getRandomInt(0, 25) * grid;
+          }
+
+          for (var i = index + 1; i < oray.cells.length; i++) {
+            if (cell.x === oray.cells[i].x && cell.y === oray.cells[i].y) {
+              showMessage = true;
+              message = getScoreMessage();
+              resetGame();
+              break;
+            }
+          }
+        });
+
+        context.fillStyle = 'white';
+        context.font = '20px Arial';
+        context.fillText('Score: ' + score, 10, 25);
+      }
+    }
+
+    function getScoreMessage() {
+      if (score >= 0 && score <= 20) {
+        return 'Cupu!';
+      } else if (score >= 21 && score <= 35 ) {
+        return 'Lumayan';
+      } else if (score >= 36 && score <= 50) {
+        return 'Ini mahkotamu ketinggalan, King!';
+      } else {
+        return 'Wah sepertinya kamu sangat jago bermain game oray purba, maka dari itu selamat kamu berhasil mendapatkan 1 unit motor NMEX!!,\n tutorial claim hadiah:\n1. teriakan password (MAAK... hayang NMEX) \n2. lalu lakukan konfirmasi dengan cara menendang pintu dengan keras.\n !!S&K Berlaku!!. good luck';
+      }
+    }
+
+    function showMessageForSeconds(seconds) {
+      context.fillStyle = 'white';
+      context.font = '15px Arial'; 
+      var maxWidth = canvas.width * 0.8; // Lebar pesan maksimum adalah 80% dari lebar canvas
+      var words = message.split(' ');
+      var line = '';
+      var y = canvas.height / 2;
+      for (var n = 0; n < words.length; n++) {
+        var testLine = line + words[n] + ' ';
+        var metrics = context.measureText(testLine);
+        var testWidth = metrics.width;
+        if (testWidth > maxWidth && n > 0) {
+          context.fillText(line, (canvas.width - metrics.width) / 2, y);
+          line = words[n] + ' ';
+          y += 20; //  jarak antar baris
+        } else {
+          line = testLine;
+        }
+      }
+      context.fillText(line, (canvas.width - context.measureText(line).width) / 2, y);
+      setTimeout(function () {
+        showMessage = false;
+      }, seconds * 1000);
+    }
+
+    function resetGame() {
+      oray.x = 160;
+      oray.y = 160;
+      oray.cells = [];
+      oray.maxCells = 4;
+      oray.dx = grid;
+      oray.dy = 0;
+      bancet.x = getRandomInt(0, 25) * grid;
+      bancet.y = getRandomInt(0, 25) * grid;
+      score = 0;
+    }
+
+    // Joystick 
+    document.getElementById('up').addEventListener('touchstart', function() {
+      if (oray.dy === 0) {
+        oray.dy = -grid;
+        oray.dx = 0;
+      }
+    });
+
+    document.getElementById('left').addEventListener('touchstart', function() {
+      if (oray.dx === 0) {
+        oray.dx = -grid;
+        oray.dy = 0;
+      }
+    });
+
+    document.getElementById('right').addEventListener('touchstart', function() {
+      if (oray.dx === 0) {
+        oray.dx = grid;
+        oray.dy = 0;
+      }
+    });
+
+    document.getElementById('down').addEventListener('touchstart', function() {
+      if (oray.dy === 0) {
+        oray.dy = grid;
+        oray.dx = 0;
+      }
+    });
+
+
+    document.getElementById('joystick').addEventListener('touchmove', function(e) {
+      e.preventDefault();
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.which === 37 && oray.dx === 0) {
+        oray.dx = -grid;
+        oray.dy = 0;
+      } else if (e.which === 38 && oray.dy === 0) {
+        oray.dy = -grid;
+        oray.dx = 0;
+      } else if (e.which === 39 && oray.dx === 0) {
+        oray.dx = grid;
+        oray.dy = 0;
+      } else if (e.which === 40 && oray.dy === 0) {
+        oray.dy = grid;
+        oray.dx = 0;
+      }
+    });
+
+    requestAnimationFrame(loop);
+  </script>
+</body>
+</html>
