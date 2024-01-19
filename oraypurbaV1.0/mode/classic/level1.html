@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Permainan Oray Sederhana</title>
+
+    <style>
+        canvas {
+            display: block;
+            position: absolute;
+            margin: auto;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            left: 0;
+            background: linear-gradient(to bottom, #3498db, #1abc9c);
+        }
+    </style>
+</head>
+<body>
+    <script>
+        var LEBAR = 20,
+            TINGGI = 20,
+            KOSONG = 0,
+            ORAY = 1,
+            BANCET = 2,
+            KIRI = 0,
+            ATAS = 1,
+            KANAN = 2,
+            BAWAH = 3,
+            TOMBOL_KIRI = 'ArrowLeft',
+            TOMBOL_ATAS = 'ArrowUp',
+            TOMBOL_KANAN = 'ArrowRight',
+            TOMBOL_BAWAH = 'ArrowDown',
+            canvas,
+            ctx,
+            keystate,
+            frame,
+            skor,
+            joystick;
+
+        grid = {
+            width: null,
+            height: null,
+            _grid: null,
+
+            init: function (d, c, r) {
+                this.width = c;
+                this.height = r;
+
+                this._grid = [];
+                for (var x = 0; x < c; x++) {
+                    this._grid.push([]);
+                    for (var y = 0; y < r; y++) {
+                        this._grid[x].push(d);
+                    }
+                }
+            },
+
+            set: function (val, x, y) {
+                this._grid[x][y] = val;
+            },
+
+            get: function (x, y) {
+                return this._grid[x][y];
+            }
+        }
+
+        oray = {
+            direction: null,
+            last: null,
+            _queue: null,
+
+            init: function (d, x, y) {
+                this.direction = d;
+
+                this._queue = [];
+                this.insert(x, y);
+            },
+
+            insert: function (x, y) {
+                this._queue.unshift({ x: x, y: y });
+                this.last = this._queue[0];
+            },
+
+            remove: function () {
+                return this._queue.pop();
+            }
+        };
+
+        function setMakanan() {
+            var kosong = [];
+
+            for (var x = 0; x < grid.width; x++) {
+                for (var y = 0; y < grid.height; y++) {
+                    if (grid.get(x, y) === KOSONG) {
+                        kosong.push({ x: x, y: y });
+                    }
+                }
+            }
+
+            var posRandom = kosong[Math.round(Math.random() * (kosong.length - 1))];
+            grid.set(BANCET, posRandom.x, posRandom.y);
+        }
+
+        function getScoreMessage() {
+            if (skor >= 0 && skor <= 20) {
+                return 'Cupu!';
+            } else if (skor >= 21 && skor <= 50) {
+                return 'Lumayan';
+            } else if (skor >= 51 && skor <= 120 ) {
+                return 'Ini mahkotamu ketinggalan, King!';
+            } else {
+                return 'Wah sepertinya kamu sangat jago bermain game oray purba, maka dari itu selamat kamu berhasil mendapatkan 1 unit motor NMEX!!, tutorial claim hadiah: 1. teriakan password (MAAK... hayang NMEX) 2. lalu lakukan konfirmasi dengan cara menendang pintu dengan keras. !!S&K Berlaku!!. Good luck';
+            }
+        }
+
+        function init() {
+            skor = 0;
+
+            grid.init(KOSONG, LEBAR, TINGGI);
+
+            var sp = { x: Math.floor(LEBAR / 2), y: TINGGI - 1 };
+            oray.init(ATAS, sp.x, sp.y);
+            grid.set(oray, sp.x, sp.y);
+
+            setMakanan();
+        }
+
+        function handleDefeat() {
+            var defeatMessage = "Game Over! " + getScoreMessage();
+            alert(defeatMessage);
+
+            init();
+        }
+
+        function loop() {
+            update();
+            draw();
+
+            window.requestAnimationFrame(loop, canvas);
+        }
+
+        function update() {
+            frame++;
+
+            // Input dari keyboard
+            if (keystate[TOMBOL_KIRI] && oray.direction !== KANAN) {
+                oray.direction = KIRI;
+            }
+            if (keystate[TOMBOL_ATAS] && oray.direction !== BAWAH) {
+                oray.direction = ATAS;
+            }
+            if (keystate[TOMBOL_KANAN] && oray.direction !== KIRI) {
+                oray.direction = KANAN;
+            }
+            if (keystate[TOMBOL_BAWAH] && oray.direction !== ATAS) {
+                oray.direction = BAWAH;
+            }
+
+            // Input dari joystick
+            if (joystick.left && oray.direction !== KANAN) {
+                oray.direction = KIRI;
+            }
+            if (joystick.up && oray.direction !== BAWAH) {
+                oray.direction = ATAS;
+            }
+            if (joystick.right && oray.direction !== KIRI) {
+                oray.direction = KANAN;
+            }
+            if (joystick.down && oray.direction !== ATAS) {
+                oray.direction = BAWAH;
+            }
+
+            if (frame % 15 === 0) {
+        var nx = oray.last.x;
+        var ny = oray.last.y;
+
+        switch (oray.direction) {
+            case KIRI:
+                nx = (nx - 1 + grid.width) % grid.width;
+                break;
+            case ATAS:
+                ny = (ny - 1 + grid.height) % grid.height;
+                break;
+            case KANAN:
+                nx = (nx + 1) % grid.width;
+                break;
+            case BAWAH:
+                ny = (ny + 1) % grid.height;
+                break;
+        }
+
+                if (0 > nx || nx > grid.width - 1 ||
+                    0 > ny || ny > grid.height - 1 ||
+                    grid.get(nx, ny) === oray
+                ) {
+                    return handleDefeat();
+                }
+
+                if (grid.get(nx, ny) === BANCET) {
+                    skor++;
+                    setMakanan();
+                } else {
+                    var ekor = oray.remove();
+                    grid.set(KOSONG, ekor.x, ekor.y);
+                }
+
+                grid.set(oray, nx, ny);
+                oray.insert(nx, ny);
+            }
+        }
+
+        function draw() {
+            var tw = canvas.width / grid.width;
+            var th = canvas.height / grid.height;
+
+            for (var x = 0; x < grid.width; x++) {
+                for (var y = 0; y < grid.height; y++) {
+                    switch (grid.get(x, y)) {
+                        case KOSONG:
+                            ctx.fillStyle = "rgba(78, 197, 241, 0.5)";
+                            break;
+                        case oray:
+                            ctx.fillStyle = "Gold";
+                            break;
+                        case BANCET:
+                            ctx.fillStyle = "red";
+                            break;
+                    }
+                    ctx.fillRect(x * tw, y * th, tw, th);
+                }
+            }
+
+            ctx.fillStyle = "#000";
+            ctx.fillText("SKOR: " + skor, 10, canvas.height - 30);
+        }
+
+        // Inisialisasi joystick
+        function initJoystick() {
+            joystick = {
+                left: false,
+                right: false,
+                up: false,
+                down: false
+            };
+
+            canvas.addEventListener('touchstart', handleTouchStart, false);
+            canvas.addEventListener('touchmove', handleTouchMove, false);
+            canvas.addEventListener('touchend', handleTouchEnd, false);
+        }
+
+        // Handler saat layar disentuh
+        function handleTouchStart(e) {
+            e.preventDefault();
+            var touch = e.touches[0];
+            joystick.startX = touch.clientX;
+            joystick.startY = touch.clientY;
+            joystick.left = false;
+            joystick.right = false;
+            joystick.up = false;
+            joystick.down = false;
+        }
+
+        // Handler saat layar digerakkan
+        function handleTouchMove(e) {
+            e.preventDefault();
+            var touch = e.touches[0];
+            var deltaX = touch.clientX - joystick.startX;
+            var deltaY = touch.clientY - joystick.startY;
+
+            if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                // Pergerakan horizontal
+                joystick.left = deltaX < 0;
+                joystick.right = deltaX > 0;
+                joystick.up = false;
+                joystick.down = false;
+            } else {
+                // Pergerakan vertikal
+                joystick.up = deltaY < 0;
+                joystick.down = deltaY > 0;
+                joystick.left = false;
+                joystick.right = false;
+            }
+        }
+
+        // Handler saat layar diangkat
+        function handleTouchEnd(e) {
+            e.preventDefault();
+            joystick.left = false;
+            joystick.right = false;
+            joystick.up = false;
+            joystick.down = false;
+        }
+
+        // Fungsi untuk memulai permainan
+        function main() {
+            canvas = document.createElement("canvas");
+            canvas.width = LEBAR * 20;
+            canvas.height = TINGGI * 20;
+            ctx = canvas.getContext("2d");
+
+            document.body.appendChild(canvas);
+
+            ctx.font = "12px Helvetica";
+
+            frame = 0;
+            keystate = {};
+
+            // Inisialisasi joystick
+            initJoystick();
+
+            // Event listener untuk input keyboard
+            document.addEventListener("keydown", function (evt) {
+                keystate[evt.key] = true;
+            });
+            document.addEventListener("keyup", function (evt) {
+                delete keystate[evt.key];
+            });
+
+            // Memulai permainan
+            init();
+            loop();
+        }
+
+        main();
+    </script>
+</body>
+</html>

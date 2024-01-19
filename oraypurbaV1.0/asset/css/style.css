@@ -1,0 +1,85 @@
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: linear-gradient(135deg, #b531e6 0%, #a51b6e 80%);
+    color: #1d1111;
+    font-family: 'Arial', sans-serif;
+}
+
+.container {
+    margin-top: 50px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+}
+
+h1 {
+    margin: 30px 0;
+    text-align: center;
+}
+
+.card {
+    width: 100%;
+    min-height: 380px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: 5px solid transparent;
+    background-clip: padding-box;
+    border-image: linear-gradient(to right, violet, indigo, blue, green, yellow, orange, red);
+    border-image-slice: 1;
+    border-radius: 12px;
+}
+
+.braindamage {
+    margin-bottom: 50px;
+    text-align: center;
+}
+
+.container p .bintang {
+    color: red;
+}
+
+.container p b {
+    color: red;
+}
+
+.container p .alert {
+    color: #fff;
+}
+
+.btn {
+    background: linear-gradient(135deg, #b531e6 0%, #a51b6e 80%);
+    color: #fff;
+    cursor: pointer;
+}
+
+@media (min-width: 576px) {
+    .card {
+        width: 50%;
+    }
+}
+
+@media (min-width: 768px) {
+    .card {
+        width: 50%;
+    }
+}
+
+@media (min-width: 992px) {
+    .card {
+        width: 50%;
+    }
+}
+
+@media (min-width: 1200px) {
+    .card {
+        width: 50%;
+    }
+}
