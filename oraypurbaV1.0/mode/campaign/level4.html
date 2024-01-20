@@ -106,11 +106,13 @@
         }
 
         function getScoreMessage() {
-            if (skor >= 0 && skor <= 2) {
+            if (skor >= 0 && skor <= 15) {
                 return 'Cupu!';
-            } else if (skor >= 3 && skor <= 5) {
+            } else if (skor >= 16 && skor <= 30) {
                 return 'Lumayan';
-            } else if (skor >= 6 && skor <= 10) {
+            } else if (skor >= 31 && skor <= 50) {
+                return 'lebih baik';
+            } else if (skor >= 51 && skor <= 70) {
                 return 'Ini mahkotamu ketinggalan, King!';
             } else {
                 return 'Wah sepertinya kamu sangat jago bermain game oray purba, maka dari itu selamat kamu berhasil mendapatkan 1 unit motor NMEX!!, tutorial claim hadiah: 1. teriakan password (MAAK... hayang NMEX) 2. lalu lakukan konfirmasi dengan cara menendang pintu dengan keras. !!S&K Berlaku!!. Good luck';
